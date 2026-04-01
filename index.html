@@ -3,7 +3,7 @@
 
 <h2>Enter Git Hub Token</h2>
 
-<input id="token" type="text" placeholder="Enter weight">
+<input id="token" type="text" placeholder="Enter token">
 
 <h2>Enter Gas Cylinder Weight</h2>
 
@@ -15,47 +15,45 @@
 
 <script>
 
-async function saveWeight(){
+async function saveWeight() {
+	try {
+		let weight = document.getElementById("weight").value;
+		let today = new Date().toISOString().slice(0, 10);
+		let newEntry = today + " : " + weight + "\n";
+		let token = document.getElementById("token").value;
+		let repo = "infotechram/gas-ai-agent";
+		let path = "gas_readings.txt";
+		let url = "https://api.github.com/repos/" + repo + "/contents/" + path;
 
-let weight=document.getElementById("weight").value
+		let response = await fetch(url);
+		if (!response.ok) {
+			throw new Error("Failed to fetch file: " + response.status + " " + response.statusText);
+		}
+		let data = await response.json();
+		let content = atob(data.content);
+		content += newEntry;
+		let updated = btoa(content);
 
-let today=new Date().toISOString().slice(0,10)
-
-let newEntry=today+" : "+weight+"\n"
-
-let token=document.getElementById("token").value
-
-let repo="infotechram/gas-ai-agent"
-
-let path="gas_readings.txt"
-
-let url="https://api.github.com/repos/"+repo+"/contents/"+path
-
-let response=await fetch(url)
-
-let data=await response.json()
-
-let content=atob(data.content)
-
-content+=newEntry
-
-let updated=btoa(content)
-
-await fetch(url,{
-method:"PUT",
-headers:{
-"Authorization":"token "+token,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:"New gas reading",
-content:updated,
-sha:data.sha
-})
-})
-
-document.getElementById("msg").innerText="Saved!"
-
+		let putResponse = await fetch(url, {
+			method: "PUT",
+			headers: {
+				"Authorization": "token " + token,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				message: "New gas reading",
+				content: updated,
+				sha: data.sha
+			})
+		});
+		if (!putResponse.ok) {
+			let errorData = await putResponse.json();
+			throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
+		}
+		document.getElementById("msg").innerText = "Saved!";
+	} catch (err) {
+		document.getElementById("msg").innerText = "Error: " + err.message;
+	}
 }
 
 </script>
