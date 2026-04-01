@@ -19,15 +19,15 @@ async function saveWeight() {
 	const saveBtn = document.getElementById("saveBtn");
 	saveBtn.disabled = true;
 	document.getElementById("msg").innerText = "Saving...";
-	try {
-		let weight = document.getElementById("weight").value;
-		let today = new Date().toISOString().slice(0, 10);
-		let newEntry = today + " : " + weight + "\n";
-		let token = document.getElementById("token").value;
-		let repo = "infotechram/gas-ai-agent";
-		let path = "gas_readings.txt";
-		let url = "https://api.github.com/repos/" + repo + "/contents/" + path;
+	let weight = document.getElementById("weight").value;
+	let today = new Date().toISOString().slice(0, 10);
+	let newEntry = today + " : " + weight + "\n";
+	let token = document.getElementById("token").value;
+	let repo = "infotechram/gas-ai-agent";
+	let path = "gas_readings.txt";
+	let url = "https://api.github.com/repos/" + repo + "/contents/" + path;
 
+	async function trySave() {
 		let response = await fetch(url);
 		if (!response.ok) {
 			throw new Error("Failed to fetch file: " + response.status + " " + response.statusText);
@@ -49,9 +49,24 @@ async function saveWeight() {
 				sha: data.sha
 			})
 		});
+		return putResponse;
+	}
+
+	try {
+		let putResponse = await trySave();
 		if (!putResponse.ok) {
 			let errorData = await putResponse.json();
-			throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
+			// If 409 Conflict, retry once
+			if (putResponse.status === 409) {
+				document.getElementById("msg").innerText = "Conflict detected, retrying...";
+				putResponse = await trySave();
+				if (!putResponse.ok) {
+					errorData = await putResponse.json();
+					throw new Error("Failed to save after retry: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
+				}
+			} else {
+				throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
+			}
 		}
 		document.getElementById("msg").innerText = "Saved!";
 	} catch (err) {
