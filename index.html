@@ -9,13 +9,16 @@
 
 <input id="weight" type="number" placeholder="Enter weight">
 
-<button onclick="saveWeight()">Save</button>
+<button id="saveBtn" onclick="saveWeight()">Save</button>
 
 <p id="msg"></p>
 
 <script>
 
 async function saveWeight() {
+	const saveBtn = document.getElementById("saveBtn");
+	saveBtn.disabled = true;
+	document.getElementById("msg").innerText = "Saving...";
 	try {
 		let weight = document.getElementById("weight").value;
 		let today = new Date().toISOString().slice(0, 10);
@@ -53,6 +56,8 @@ async function saveWeight() {
 		document.getElementById("msg").innerText = "Saved!";
 	} catch (err) {
 		document.getElementById("msg").innerText = "Error: " + err.message;
+	} finally {
+		saveBtn.disabled = false;
 	}
 }
 
