@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 
+<h2>Enter Git Hub Token</h2>
+
+<input id="token" type="number" placeholder="Enter weight">
+
 <h2>Enter Gas Cylinder Weight</h2>
 
 <input id="weight" type="number" placeholder="Enter weight">
@@ -19,9 +23,9 @@ let today=new Date().toISOString().slice(0,10)
 
 let newEntry=today+" : "+weight+"\n"
 
-let token="YOUR_GITHUB_TOKEN"
+let token=document.getElementById("token").value
 
-let repo="YOUR_USERNAME/gas-ai-agent"
+let repo="infotechram/gas-ai-agent"
 
 let path="gas_readings.txt"
 
