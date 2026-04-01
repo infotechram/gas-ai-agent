@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<h2>Enter Gas Cylinder Weight</h2>
+
+<input id="weight" type="number" placeholder="Enter weight">
+
+<button onclick="saveWeight()">Save</button>
+
+<p id="msg"></p>
+
+<script>
+
+async function saveWeight(){
+
+let weight=document.getElementById("weight").value
+
+let today=new Date().toISOString().slice(0,10)
+
+let newEntry=today+" : "+weight+"\n"
+
+let token="YOUR_GITHUB_TOKEN"
+
+let repo="YOUR_USERNAME/gas-ai-agent"
+
+let path="gas_readings.txt"
+
+let url="https://api.github.com/repos/"+repo+"/contents/"+path
+
+let response=await fetch(url)
+
+let data=await response.json()
+
+let content=atob(data.content)
+
+content+=newEntry
+
+let updated=btoa(content)
+
+await fetch(url,{
+method:"PUT",
+headers:{
+"Authorization":"token "+token,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"New gas reading",
+content:updated,
+sha:data.sha
+})
+})
+
+document.getElementById("msg").innerText="Saved!"
+
+}
+
+</script>
+
+</html>
