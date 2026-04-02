@@ -1,75 +1,51 @@
 <!DOCTYPE html>
 <html>
 
-<h2>Enter Git Hub Token</h2>
+<h2>Gas Monitoring System</h2>
 
-<input id="token" type="text" placeholder="Enter token">
+<input id="weight" type="number" placeholder="Enter Cylinder Weight">
 
-<h2>Enter Gas Cylinder Weight</h2>
+<br><br>
 
-<input id="weight" type="number" placeholder="Enter weight">
+<button onclick="saveReading()">Save Reading</button>
 
-<button id="saveBtn" onclick="saveWeight()">Save</button>
+<button onclick="predict()">Predict Gas Usage</button>
 
-<p id="msg"></p>
+<h3 id="prediction"></h3>
 
 <script>
 
-async function saveWeight() {
-	const saveBtn = document.getElementById("saveBtn");
-	saveBtn.disabled = true;
-	document.getElementById("msg").innerText = "Saving...";
-	let weight = document.getElementById("weight").value;
-	let today = new Date().toISOString().slice(0, 10);
-	let newEntry = today + " : " + weight + "\n";
-	let token = document.getElementById("token").value;
-	let repo = "infotechram/gas-ai-agent";
-	let path = "gas_readings.txt";
-	let url = "https://api.github.com/repos/" + repo + "/contents/" + path;
+function saveReading(){
 
-	async function trySave() {
-		// Always fetch latest file and sha before saving
-		let response = await fetch(url);
-		if (!response.ok) {
-			throw new Error("Failed to fetch file: " + response.status + " " + response.statusText);
-		}
-		let data = await response.json();
-		let content = atob(data.content);
-		content += newEntry;
-		let updated = btoa(content);
+let weight=document.getElementById("weight").value
 
-		let putResponse = await fetch(url, {
-			method: "PUT",
-			headers: {
-				"Authorization": "token " + token,
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				message: "New gas reading",
-				content: updated,
-				sha: data.sha
-			})
-		});
-		return putResponse;
-	}
+alert("Weight recorded: "+weight)
 
-	try {
-		let putResponse = await trySave();
-		if (putResponse.ok) {
-			document.getElementById("msg").innerText = "Saved! Refreshing...";
-			setTimeout(() => {
-				location.reload();
-			}, 1000);
-		} else {
-			let errorData = await putResponse.json();
-			throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
-		}
-	} catch (err) {
-		document.getElementById("msg").innerText = "Error: " + err.message;
-	} finally {
-		saveBtn.disabled = false;
-	}
 }
+
+function predict(){
+
+window.open(
+"https://github.com/infotechram/gas-ai-agent/actions/workflows/predict.yml"
+)
+
+}
+
+async function loadResult(){
+
+try{
+
+let response = await fetch("result.txt")
+
+let text = await response.text()
+
+document.getElementById("prediction").innerText = text
+
+}catch(e){}
+
+}
+
+loadResult()
 
 </script>
 

@@ -1,0 +1,37 @@
+name: Gas Prediction AI
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  predict:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI prediction
+        run: python ai_predict.py
+
+      - name: Commit result
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add result.txt
+          git commit -m "Update prediction result" || echo "No changes"
+          git push
