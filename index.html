@@ -3,6 +3,10 @@
 
 <h2>Gas Monitoring System</h2>
 
+<input id="token" type="password" placeholder="Enter GitHub Token">
+
+<br><br>
+
 <input id="weight" type="number" placeholder="Enter Gas Weight">
 
 <br><br>
@@ -10,7 +14,7 @@
 <button onclick="saveReading()">Save Reading</button>
 <button onclick="predict()">Predict</button>
 
-<p id="result"></p>
+<h3 id="result"></h3>
 
 <script>
 
@@ -19,44 +23,76 @@ const repo="gas-ai-agent"
 
 async function saveReading(){
 
+let token=document.getElementById("token").value
 let weight=document.getElementById("weight").value
 
-await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`,{
+const path="gas_readings.txt"
 
-method:"POST",
+let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+headers:{
+Authorization:`Bearer ${token}`
+}
+})
+
+let data=await file.json()
+
+let content=atob(data.content)
+
+let today=new Date().toISOString().split("T")[0]
+
+content += "\n"+today+","+weight
+
+let updated=btoa(content)
+
+await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+
+method:"PUT",
 
 headers:{
-"Accept":"application/vnd.github+json"
+Authorization:`Bearer ${token}`,
+"Content-Type":"application/json"
 },
 
 body:JSON.stringify({
-title:"gas-reading",
-body:weight
+message:"Add gas reading",
+content:updated,
+sha:data.sha
 })
 
 })
 
-alert("Reading submitted")
+alert("Reading Saved")
 
 }
 
 async function predict(){
 
+let token=document.getElementById("token").value
+
 await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/predict.yml/dispatches`,{
+
 method:"POST",
+
 headers:{
-"Accept":"application/vnd.github+json"
+Authorization:`Bearer ${token}`,
+"Content-Type":"application/json"
 },
+
 body:JSON.stringify({ref:"main"})
+
 })
 
-setTimeout(showResult,5000)
+setTimeout(showResult,6000)
 
 }
 
 async function showResult(){
 
-let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/result.txt`)
+let token=document.getElementById("token").value
+
+let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/result.txt`,{
+headers:{Authorization:`Bearer ${token}`}
+})
 
 let data=await file.json()
 
