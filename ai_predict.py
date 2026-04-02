@@ -1,36 +1,36 @@
 import pandas as pd
-import numpy as np
 from sklearn.linear_model import LinearRegression
+import numpy as np
 
-data = pd.read_csv("gas_readings.txt", header=None)
-data.columns = ["date","weight"]
+data = pd.read_csv("gas_readings.txt", names=["date","weight"])
 
-data["day"] = range(len(data))
+# convert date
+data["date"] = pd.to_datetime(data["date"])
 
-X = data[["day"]]
-y = data["weight"]
+# convert to days
+data["days"] = (data["date"] - data["date"].min()).dt.days
 
-model = LinearRegression()
-model.fit(X,y)
+# need at least 2 readings
+if len(data) < 2:
+    result="Need at least 2 readings for prediction"
+else:
 
-current_weight = data["weight"].iloc[-1]
+    X = data["days"].values.reshape(-1,1)
+    y = data["weight"].values
 
-empty_weight = 15
+    model = LinearRegression()
+    model.fit(X,y)
 
-remaining = current_weight - empty_weight
+    daily_usage = abs(model.coef_[0])
 
-daily_usage = abs(data["weight"].diff().mean())
+    current_weight = y[-1]
+    remaining = current_weight - 0.5
 
-days_left = int(remaining/daily_usage)
-
-result = f"""
-Current Weight: {current_weight}
-Average Daily Usage: {round(daily_usage,2)}
-Remaining Gas: {round(remaining,2)}
-Predicted Days Left: {days_left}
-"""
-
-print(result)
+    if daily_usage == 0 or np.isnan(daily_usage):
+        result="Not enough usage data yet"
+    else:
+        days_left = int(remaining/daily_usage)
+        result=f"Estimated days remaining: {days_left}"
 
 with open("result.txt","w") as f:
     f.write(result)
