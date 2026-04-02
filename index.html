@@ -28,6 +28,7 @@ async function saveWeight() {
 	let url = "https://api.github.com/repos/" + repo + "/contents/" + path;
 
 	async function trySave() {
+		// Always fetch latest file and sha before saving
 		let response = await fetch(url);
 		if (!response.ok) {
 			throw new Error("Failed to fetch file: " + response.status + " " + response.statusText);
@@ -56,9 +57,10 @@ async function saveWeight() {
 		let putResponse = await trySave();
 		if (!putResponse.ok) {
 			let errorData = await putResponse.json();
-			// If 409 Conflict, retry once
+			// If 409 Conflict, retry once with latest file/sha
 			if (putResponse.status === 409) {
 				document.getElementById("msg").innerText = "Conflict detected, retrying...";
+				// On retry, re-fetch latest file and sha, append new entry, and try saving again
 				putResponse = await trySave();
 				if (!putResponse.ok) {
 					errorData = await putResponse.json();
