@@ -1,0 +1,33 @@
+name: Save Gas Reading
+
+on:
+  workflow_dispatch:
+    inputs:
+      weight:
+        description: "Gas Weight"
+        required: true
+
+jobs:
+
+  save:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Add reading
+        run: |
+          echo "$(date +%F),${{ github.event.inputs.weight }}" >> gas_readings.txt
+
+      - name: Commit change
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add gas_readings.txt
+          git commit -m "Add gas reading"
+          git push

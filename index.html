@@ -9,9 +9,7 @@
 
 <button onclick="saveReading()">Save Reading</button>
 
-<button onclick="predict()">Predict Gas Usage</button>
-
-<h3 id="prediction"></h3>
+<button onclick="predict()">Predict Usage</button>
 
 <script>
 
@@ -19,33 +17,19 @@ function saveReading(){
 
 let weight=document.getElementById("weight").value
 
-alert("Weight recorded: "+weight)
+let url=`https://github.com/infotechram/gas-ai-agent/actions/workflows/save-reading.yml`
+
+window.open(url)
 
 }
 
 function predict(){
 
-window.open(
-"https://github.com/infotechram/gas-ai-agent/actions/workflows/predict.yml"
-)
+let url=`https://github.com/infotechram/gas-ai-agent/actions/workflows/predict.yml`
+
+window.open(url)
 
 }
-
-async function loadResult(){
-
-try{
-
-let response = await fetch("result.txt")
-
-let text = await response.text()
-
-document.getElementById("prediction").innerText = text
-
-}catch(e){}
-
-}
-
-loadResult()
 
 </script>
 
