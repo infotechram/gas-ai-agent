@@ -1,5 +1,1 @@
-
-Current Weight: 25
-Average Daily Usage: 15.0
-Remaining Gas: 10
-Predicted Days Left: 0
+Need at least 2 readings for prediction
