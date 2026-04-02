@@ -3,31 +3,66 @@
 
 <h2>Gas Monitoring System</h2>
 
-<input id="weight" type="number" placeholder="Enter Cylinder Weight">
+<input id="weight" type="number" placeholder="Enter Gas Weight">
 
 <br><br>
 
 <button onclick="saveReading()">Save Reading</button>
+<button onclick="predict()">Predict</button>
 
-<button onclick="predict()">Predict Usage</button>
+<p id="result"></p>
 
 <script>
 
-function saveReading(){
+const owner="infotechram"
+const repo="gas-ai-agent"
+
+async function saveReading(){
 
 let weight=document.getElementById("weight").value
 
-let url=`https://github.com/infotechram/gas-ai-agent/actions/workflows/save-reading.yml`
+await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`,{
 
-window.open(url)
+method:"POST",
+
+headers:{
+"Accept":"application/vnd.github+json"
+},
+
+body:JSON.stringify({
+title:"gas-reading",
+body:weight
+})
+
+})
+
+alert("Reading submitted")
 
 }
 
-function predict(){
+async function predict(){
 
-let url=`https://github.com/infotechram/gas-ai-agent/actions/workflows/predict.yml`
+await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/predict.yml/dispatches`,{
+method:"POST",
+headers:{
+"Accept":"application/vnd.github+json"
+},
+body:JSON.stringify({ref:"main"})
+})
 
-window.open(url)
+setTimeout(showResult,5000)
+
+}
+
+async function showResult(){
+
+let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/result.txt`)
+
+let data=await file.json()
+
+let result=atob(data.content)
+
+document.getElementById("result").innerText=result
 
 }
 

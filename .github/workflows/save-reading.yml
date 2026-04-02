@@ -1,15 +1,13 @@
 name: Save Gas Reading
 
 on:
-  workflow_dispatch:
-    inputs:
-      weight:
-        description: "Gas Weight"
-        required: true
+  issues:
+    types: [opened]
 
 jobs:
-
   save:
+
+    if: contains(github.event.issue.title,'gas-reading')
 
     runs-on: ubuntu-latest
 
@@ -20,14 +18,17 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Add reading
+      - name: Save reading
         run: |
-          echo "$(date +%F),${{ github.event.inputs.weight }}" >> gas_readings.txt
+          echo "$(date +%F),${{ github.event.issue.body }}" >> gas_readings.txt
 
       - name: Commit change
+        env:
+          TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          git remote set-url origin https://x-access-token:$TOKEN@github.com/${{ github.repository }}
           git add gas_readings.txt
-          git commit -m "Add gas reading"
+          git commit -m "Add gas reading" || echo "No change"
           git push
