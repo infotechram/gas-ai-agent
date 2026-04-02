@@ -75,23 +75,27 @@ body:JSON.stringify({ref:"main"})
 
 document.getElementById("result").innerText="AI running..."
 
-setTimeout(showResult,7000)
+setTimeout(showResult,15000)
 
 }
-
 async function showResult(){
 
 let token=document.getElementById("token").value
 
-let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/result.txt`,{
-headers:{Authorization:`Bearer ${token}`}
+let response = await fetch(
+`https://api.github.com/repos/${owner}/${repo}/contents/result.txt`,
+{
+headers:{
+Authorization:`Bearer ${token}`,
+Accept:"application/vnd.github+json"
+}
 })
 
-let data=await file.json()
+let data = await response.json()
 
-let result=atob(data.content)
+let decoded = atob(data.content.replace(/\n/g,""))
 
-document.getElementById("result").innerText=result
+document.getElementById("result").innerText = decoded
 
 }
 
