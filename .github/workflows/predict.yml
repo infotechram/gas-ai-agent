@@ -14,9 +14,18 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Run AI
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install pandas
+
+      - name: Run AI prediction
         run: python ai_predict.py
 
       - name: Commit result

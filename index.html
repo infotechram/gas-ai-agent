@@ -12,6 +12,7 @@
 <br><br>
 
 <button onclick="saveReading()">Save Reading</button>
+
 <button onclick="predict()">Predict</button>
 
 <h3 id="result"></h3>
@@ -29,9 +30,7 @@ let weight=document.getElementById("weight").value
 const path="gas_readings.txt"
 
 let file=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
-headers:{
-Authorization:`Bearer ${token}`
-}
+headers:{Authorization:`Bearer ${token}`}
 })
 
 let data=await file.json()
@@ -40,28 +39,24 @@ let content=atob(data.content)
 
 let today=new Date().toISOString().split("T")[0]
 
-content += "\n"+today+","+weight
+content+="\n"+today+","+weight
 
 let updated=btoa(content)
 
 await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
-
 method:"PUT",
-
 headers:{
 Authorization:`Bearer ${token}`,
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
 message:"Add gas reading",
 content:updated,
 sha:data.sha
 })
-
 })
 
-alert("Reading Saved")
+alert("Reading saved")
 
 }
 
@@ -70,19 +65,17 @@ async function predict(){
 let token=document.getElementById("token").value
 
 await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/predict.yml/dispatches`,{
-
 method:"POST",
-
 headers:{
 Authorization:`Bearer ${token}`,
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({ref:"main"})
-
 })
 
-setTimeout(showResult,6000)
+document.getElementById("result").innerText="AI running..."
+
+setTimeout(showResult,7000)
 
 }
 
