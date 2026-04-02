@@ -55,22 +55,15 @@ async function saveWeight() {
 
 	try {
 		let putResponse = await trySave();
-		if (!putResponse.ok) {
+		if (putResponse.ok) {
+			document.getElementById("msg").innerText = "Saved! Refreshing...";
+			setTimeout(() => {
+				location.reload();
+			}, 1000);
+		} else {
 			let errorData = await putResponse.json();
-			// If 409 Conflict, retry once with latest file/sha
-			if (putResponse.status === 409) {
-				document.getElementById("msg").innerText = "Conflict detected, retrying...";
-				// On retry, re-fetch latest file and sha, append new entry, and try saving again
-				putResponse = await trySave();
-				if (!putResponse.ok) {
-					errorData = await putResponse.json();
-					throw new Error("Failed to save after retry: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
-				}
-			} else {
-				throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
-			}
+			throw new Error("Failed to save: " + putResponse.status + " " + putResponse.statusText + "\n" + (errorData.message || ""));
 		}
-		document.getElementById("msg").innerText = "Saved!";
 	} catch (err) {
 		document.getElementById("msg").innerText = "Error: " + err.message;
 	} finally {
